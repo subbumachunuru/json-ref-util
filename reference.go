@@ -99,7 +99,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 			// Recursively resolve references in nested maps
 			if err := resolveReferences(nestedMap, basePath, referencedFiles); err != nil {
 				return err
-			} 
+			}
 		}
 	}
 
@@ -119,7 +119,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 			return err
 		}
 
-		// Remove the $override key from the main data
+		// Remove the $add key from the main data
 		delete(dataMap, "$add")
 	}
 
@@ -129,7 +129,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 			return err
 		}
 
-		// Remove the $override key from the main data
+		// Remove the $delet key from the main data
 		delete(dataMap, "$delete")
 	}
 
@@ -174,7 +174,7 @@ func add(data map[string]interface{}, addData interface{}) error {
 			if err := add(dataMap, nestedMap); err != nil {
 				return err
 			}
-		} else if _, ok := data[key]; ok {
+		} else if _, ok := data[key]; !ok {
 			data[key] = value
 		}
 	}
@@ -200,7 +200,7 @@ func remove(data map[string]interface{}, deleteData interface{}) error {
 		} else if ok1 && !ok2 {
 			deletableKeys, ok := value.([]interface{})
 			if ok {
-				// delete the specified keys
+				// Delete the specified keys
 				for _, deletableKey := range deletableKeys {
 					delete(dataMap, deletableKey.(string))
 				}
