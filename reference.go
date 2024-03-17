@@ -234,6 +234,16 @@ func add(data map[string]interface{}, addData interface{}) error {
 }
 
 func remove(data map[string]interface{}, deleteData interface{}) error {
+
+	if deletableKeys, ok := deleteData.([]interface{}); ok {
+		// Delete the specified keys
+		for _, deletableKey := range deletableKeys {
+			delete(data, deletableKey.(string))
+		}
+
+		return nil
+	}
+
 	deleteDataMap, ok := deleteData.(map[string]interface{})
 	if !ok {
 		return fmt.Errorf("invalid $delete value, deleteData = %v", deleteData)
