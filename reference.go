@@ -8,16 +8,66 @@ import(
 	"slices"
 )
 
-func FetchDeferencedJsonString(filePath string) ([]byte, error) {
+type OutputDirectoryData struct {
+	outputDirectoryPath *string
+}
+
+type OutputDirectoryDataOption func(field OutputDirectoryData)
+
+func WithOutputDirectoryPath(outputDirectoryPath string) OutputDirectoryDataOption {
+	return func(r OutputDirectoryData) {
+		*r.outputDirectoryPath = outputDirectoryPath
+	}
+}
+
+func FetchDereferencedJsonString(filePath string) ([]byte, error) {
 	
 	jsonMap := make(map[string]interface{})
 
-	err := parseJsonFile(filePath, jsonMap)
-	if err != nil {
+	if err := parseJsonFile(filePath, jsonMap); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	referencedFiles := make([]string, 0)
+	referencedFiles = append(referencedFiles, filePath)
+
+	if err := resolveReferences(jsonMap, filepath.Dir(filePath), referencedFiles); err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(jsonMap)
+}
+
+func GenerateDeferencedJson(filePath string, options ...OutputDirectoryDataOption) error {
+	outputDirectoryData := OutputDirectoryData {
+		outputDirectoryPath: new(string),
+	}
+
+	for _, option := range options {
+		option(outputDirectoryData)
+	}
+
+	jsonMap := make(map[string]interface{})
+
+	if err := parseJsonFile(filePath, jsonMap); err != nil {
+		return nil, err
+	}
+
+	referencedFiles := make([]string, 0)
+	referencedFiles = append(referencedFiles, filePath)
+
+	if err := resolveReferences(jsonMap, filepath.Dir(filePath), referencedFiles); err != nil {
+		return nil, err
+	}
+
+	var outputDirectoryPath string
+	if *outputDirectoryData.outputDirectoryPath != nil {
+		outputDirectoryPath = *outputDirectoryData.outputDirectoryPath
+	} else {
+		outputDirectoryPath = filepath.Dir(filePath)
+	}
+
+	return generateUpdatedJson(filepath.Base(filePath), outputDirectoryPath, jsonMap)
 }
 
 func parseJsonFile(filePath string, jsonMap interface{}) error {
@@ -206,6 +256,20 @@ func remove(data map[string]interface{}, deleteData interface{}) error {
 				}
 			}
 		}
+	}
+
+	return nil
+}
+
+func generateUpdatedJson(fileName, outputPath string, data interface{}) error {
+	updatedJson, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	outputFilePath := filepath.Join(outputPath, "output_", fileName)
+	if err = os.WriteFile(outputFilePath, updatedJson, 0644); err != nil {
+		return fmt.Errorf("error writing updated json to file %s with error %v", outputFilePath, err)
 	}
 
 	return nil
