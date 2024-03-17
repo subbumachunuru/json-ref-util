@@ -1,6 +1,6 @@
 package jsonrefutil
 
-import(
+import (
 	"encoding/json"
 	"fmt"
 	"os"
@@ -21,7 +21,7 @@ func WithOutputDirectoryPath(outputDirectoryPath string) OutputDirectoryDataOpti
 }
 
 func FetchDereferencedJsonString(filePath string) ([]byte, error) {
-	
+
 	jsonMap := make(map[string]interface{})
 
 	if err := parseJsonFile(filePath, jsonMap); err != nil {
@@ -38,8 +38,9 @@ func FetchDereferencedJsonString(filePath string) ([]byte, error) {
 	return json.Marshal(jsonMap)
 }
 
-func GenerateDeferencedJson(filePath string, options ...OutputDirectoryDataOption) error {
-	outputDirectoryData := OutputDirectoryData {
+func GenerateDereferencedJson(filePath string, options ...OutputDirectoryDataOption) error {
+
+	outputDirectoryData := OutputDirectoryData{
 		outputDirectoryPath: new(string),
 	}
 
@@ -50,18 +51,18 @@ func GenerateDeferencedJson(filePath string, options ...OutputDirectoryDataOptio
 	jsonMap := make(map[string]interface{})
 
 	if err := parseJsonFile(filePath, jsonMap); err != nil {
-		return nil, err
+		return err
 	}
 
 	referencedFiles := make([]string, 0)
 	referencedFiles = append(referencedFiles, filePath)
 
 	if err := resolveReferences(jsonMap, filepath.Dir(filePath), referencedFiles); err != nil {
-		return nil, err
+		return err
 	}
 
 	var outputDirectoryPath string
-	if *outputDirectoryData.outputDirectoryPath != nil {
+	if *outputDirectoryData.outputDirectoryPath != "" {
 		outputDirectoryPath = *outputDirectoryData.outputDirectoryPath
 	} else {
 		outputDirectoryPath = filepath.Dir(filePath)
