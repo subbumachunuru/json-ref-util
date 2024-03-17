@@ -1,4 +1,4 @@
-package json-ref-util
+package jsonrefutil
 
 import(
 	"encoding/json"
@@ -16,6 +16,8 @@ func FetchDeferencedJsonString(filePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return nil, nil
 }
 
 func parseJsonFile(filePath string, jsonMap interface{}) error {
@@ -49,7 +51,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 			return fmt.Errorf("$ref must have 'path' value, refvalue = %v", refValue)
 		}
 
-		refFilePath := filePath.Join(basePath, refPath)
+		refFilePath := filepath.Join(basePath, refPath)
 		if alreadyReferenced := slices.Contains(referencedFiles, refFilePath); alreadyReferenced {
 			return fmt.Errorf("cyclic reference detected, referencedFiles = %v, duplicateFilePath = %s", referencedFiles, refFilePath)
 		} else {
@@ -59,7 +61,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 		refFileData := make(map[string]interface{})
 		var referencedValue interface{}
 
-		if err = parseJsonFile(refFilePath, &refFileData); err != nil {
+		if err := parseJsonFile(refFilePath, &refFileData); err != nil {
 			return err
 		}
 
@@ -75,7 +77,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 		}
 
 		// Recursively resolve references in the referenced file
-		if err = resolveReferences(referencedValue, filePath.Dir(refFilePath), referencedFiles); err != nil {
+		if err := resolveReferences(referencedValue, filepath.Dir(refFilePath), referencedFiles); err != nil {
 			return err
 		}
 
@@ -92,7 +94,7 @@ func resolveReferences(data interface{}, basePath string, referencedFiles []stri
 	}
 
 	// Process other keys in the main data
-	for _, value := dataMap {
+	for _, value := range dataMap {
 		if nestedMap, ok := value.(map[string]interface{}); ok {
 			// Recursively resolve references in nested maps
 			if err := resolveReferences(nestedMap, basePath, referencedFiles); err != nil {
