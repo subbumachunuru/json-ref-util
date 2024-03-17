@@ -20,7 +20,7 @@ func WithOutputDirectoryPath(outputDirectoryPath string) OutputDirectoryDataOpti
 	}
 }
 
-func FetchDereferencedJsonString(filePath string) ([]byte, error) {
+func FetchDereferencedJson(filePath string) ([]byte, error) {
 
 	jsonMap := make(map[string]interface{})
 
