@@ -24,7 +24,7 @@ func FetchDereferencedJson(filePath string) ([]byte, error) {
 
 	jsonMap := make(map[string]interface{})
 
-	if err := parseJsonFile(filePath, jsonMap); err != nil {
+	if err := parseJsonFile(filePath, &jsonMap); err != nil {
 		return nil, err
 	}
 
@@ -50,7 +50,7 @@ func GenerateDereferencedJson(filePath string, options ...OutputDirectoryDataOpt
 
 	jsonMap := make(map[string]interface{})
 
-	if err := parseJsonFile(filePath, jsonMap); err != nil {
+	if err := parseJsonFile(filePath, &jsonMap); err != nil {
 		return err
 	}
 
